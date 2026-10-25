@@ -9,6 +9,65 @@
 <div class="panel"><h2>Your resources</h2><div id="resourcesList" class="muted">Loading…</div></div><div class="panel"><h2>Your MCQs</h2><div id="mcqsList" class="muted">Loading…</div></div><div class="row"><button class="btn light" id="refresh">Refresh lists</button><button class="btn dark" id="logout">Sign out</button></div></section><div id="msg" class="alert hidden" role="status"></div><p class="muted">Security: never put a Supabase service-role/secret key in this website. Use only the anon/publishable key and the row-level security policies in supabase-setup.sql.</p></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script>
 const cfg=window.DG_CONFIG||{};const sb=cfg.url&&cfg.anonKey?supabase.createClient(cfg.url,cfg.anonKey):null;const $=id=>document.getElementById(id);let user=null;
+sb?.auth.onAuthStateChange((event) => {
+  if (event === "PASSWORD_RECOVERY") {
+    document.getElementById("loginPanel").classList.add("hidden");
+    document.getElementById("appPanel").classList.add("hidden");
+
+    let panel = document.getElementById("recoveryPanel");
+
+    if (!panel) {
+      panel = document.createElement("section");
+      panel.id = "recoveryPanel";
+      panel.className = "panel";
+      panel.innerHTML = `
+        <h2>Reset administrator password</h2>
+        <form id="recoveryForm">
+          <label>New password</label>
+          <input id="newPassword" type="password"
+            minlength="8" required>
+          <label>Confirm password</label>
+          <input id="confirmPassword" type="password"
+            minlength="8" required>
+          <button type="submit">Save new password</button>
+          <p id="recoveryMessage"></p>
+        </form>
+      `;
+      document.querySelector(".wrap").appendChild(panel);
+    }
+
+    panel.classList.remove("hidden");
+
+    document.getElementById("recoveryForm").onsubmit =
+      async (e) => {
+        e.preventDefault();
+
+        const password =
+          document.getElementById("newPassword").value;
+        const confirm =
+          document.getElementById("confirmPassword").value;
+        const msg =
+          document.getElementById("recoveryMessage");
+
+        if (password !== confirm) {
+          msg.textContent = "Passwords do not match.";
+          return;
+        }
+
+        const { error } = await sb.auth.updateUser({
+          password: password
+        });
+
+        if (error) {
+          msg.textContent = error.message;
+          return;
+        }
+
+        msg.textContent =
+          "Password updated. Return to admin sign-in.";
+      };
+  }
+});
 function message(t,kind=''){const el=$('msg');el.textContent=t;el.className='alert '+kind;el.classList.remove('hidden')}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function setUI(signed){$('loginPanel').classList.toggle('hidden',signed);$('appPanel').classList.toggle('hidden',!signed);$('setupAlert').classList.toggle('hidden',!!sb)}
