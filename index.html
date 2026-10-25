@@ -29,4 +29,12 @@ try{const {data:qs,error:qe}=await client.from('mcqs').select('id,question,optio
 const {data:rs,error:re}=await client.from('resources').select('id,title,description,category,file_url,file_type').eq('published',true).order('created_at',{ascending:false}).limit(100);if(re)throw re;if(!rs?.length)r.innerHTML='<div class="empty">No infographics or PDFs published yet.</div>';else r.innerHTML=rs.map(x=>`<article class="resource">${x.file_type==='image'?`<img loading="lazy" src="${esc(x.file_url)}" alt="${esc(x.title)}">`:''}<small>${esc(x.category||'Study resource')}</small><h3>${esc(x.title)}</h3><p>${esc(x.description||'')}</p><a href="${esc(x.file_url)}" target="_blank" rel="noopener">${x.file_type==='pdf'?'Open / download PDF':'Open infographic'} →</a></article>`).join('')
 }catch(e){q.innerHTML='<div class="empty">Could not load content. Check the Supabase setup and database policies.</div>';r.innerHTML='<div class="empty">Could not load resources. Check the Supabase setup and storage policies.</div>';console.error(e)}}
 loadPublic();
-</script></body></html>
+</script>
+<section style="text-align:center;padding:20px;background:#f5f7fb;border-radius:12px;margin:20px;">
+  <h3>📊 Daily Gyankosh Visitors</h3>
+  <p>Total website visits:</p>
+  <script async src="https://counterapi.com/c.js?ns=daily-gyankosh-bt625034"></script>
+  <div class="counterapi" key="homepage" label="visits" icon="eye"></div>
+  <p>Thank you for visiting Daily Gyankosh!</p>
+</section>
+</body></html>
